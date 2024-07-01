@@ -1,5 +1,9 @@
 
-# Proxychains Script
+
+ ___  ____ ____ _ _ _ _    _ _ ___ ____ ____ ____ ___ ____ ____
+ |--' |--< [__] _X_  Y  -- _X_  |  |--< |--| |___  |  [__] |--<
+
+
 ## For use with proxychains4
 
 This script automates the setup of proxy configurations using Proxychains-ng by fetching fresh SOCKS5 proxies from https://freeproxy.world/
