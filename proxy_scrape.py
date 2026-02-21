@@ -240,5 +240,26 @@ def main() -> None:
     print(f"[+] Wrote {min(len(valid_proxies), MAX_RESULTS)} proxies to {OUTPUT_FILE}")
 
 
+        print(f"[+] Page {page_num}: extracted {len(proxies)} SOCKS5 proxies")
+        all_proxies.extend(proxies)
+
+    unique_proxies: list[tuple[str, str, str]] = []
+    seen: set[tuple[str, str, str]] = set()
+    for proxy in all_proxies:
+        if proxy not in seen:
+            seen.add(proxy)
+            unique_proxies.append(proxy)
+
+    if not unique_proxies:
+        print("[!] No proxies extracted. Output file was not modified.")
+        return
+
+    with OUTPUT_FILE.open("w", encoding="utf-8") as txt_file:
+        for proxy_type, ip, port in unique_proxies:
+            txt_file.write(f"{proxy_type} {ip} {port}\n")
+
+    print(f"[+] Wrote {len(unique_proxies)} unique proxies to {OUTPUT_FILE}")
+
+
 if __name__ == "__main__":
     main()
