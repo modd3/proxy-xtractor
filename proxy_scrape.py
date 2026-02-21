@@ -83,6 +83,75 @@ def fetch_freeproxy_world(session: requests.Session, pages: int = 10) -> list[Pr
             cells = [cell.get_text(" ", strip=True) for cell in row.find_all("td")]
             if len(cells) < 2:
                 continue
+            ip = ip_match.group(0)
+
+            port = next((cell for cell in cells if cell.isdigit() and 1 <= len(cell) <= 5), None)
+            if not port:
+                continue
+
+            key = (ip, port)
+            if key in seen:
+                continue
+            seen.add(key)
+            proxies.append(ProxyEntry("SOCKS5", ip, port, "freeproxy.world"))
+            page_count += 1
+
+        print(f"[*] freeproxy.world page {page_num}: {page_count} candidate proxies")
+
+    return proxies
+
+
+def fetch_proxyscrape_api(session: requests.Session) -> list[ProxyEntry]:
+    url = "https://api.proxyscrape.com/v2/"
+    params = {
+        "request": "displayproxies",
+        "protocol": "socks5",
+        "timeout": "2000",
+        "country": "all",
+        "ssl": "all",
+        "anonymity": "all",
+    }
+    try:
+        response = session.get(url, params=params, timeout=20)
+        response.raise_for_status()
+    except requests.RequestException as exc:
+        print(f"[!] proxyscrape API failed: {exc}")
+        return []
+
+    proxies: list[ProxyEntry] = []
+    for line in response.text.splitlines():
+        line = line.strip()
+        if not line or ":" not in line:
+            continue
+        ip, port = line.rsplit(":", 1)
+        if IP_PATTERN.fullmatch(ip) and port.isdigit():
+            proxies.append(ProxyEntry("SOCKS5", ip, port, "proxyscrape"))
+
+    print(f"[*] proxyscrape: {len(proxies)} candidate proxies")
+    return proxies
+
+
+def fetch_proxy_list_download(session: requests.Session) -> list[ProxyEntry]:
+    url = "https://www.proxy-list.download/api/v1/get"
+    params = {"type": "socks5"}
+    try:
+        response = session.get(url, params=params, timeout=20)
+        response.raise_for_status()
+    except requests.RequestException as exc:
+        print(f"[!] proxy-list.download API failed: {exc}")
+        return []
+
+    proxies: list[ProxyEntry] = []
+    for line in response.text.splitlines():
+        line = line.strip()
+        if not line or ":" not in line:
+            continue
+        ip, port = line.rsplit(":", 1)
+        if IP_PATTERN.fullmatch(ip) and port.isdigit():
+            proxies.append(ProxyEntry("SOCKS5", ip, port, "proxy-list.download"))
+
+    print(f"[*] proxy-list.download: {len(proxies)} candidate proxies")
+    return proxies
 
             ip_match = next((IP_PATTERN.search(cell) for cell in cells if IP_PATTERN.search(cell)), None)
             if not ip_match:

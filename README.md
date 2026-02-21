@@ -45,7 +45,7 @@ To clear the `proxychains4.conf` file, use the `clear_conf.sh` script:
 
 The main script (`add_prox2conf.sh`) performs the following tasks:
 - Checks if `proxychains4.conf.default` exists; if not, creates it based on existing configurations (`proxychains4.conf` or `proxychains.conf`).
-- Fetches SOCKS5 proxies from multiple public sources using `python3 proxy_scrape.py`.
+- Fetches SOCKS5 proxies from multiple public sources using `python proxy_scrape.py`.
 - Deduplicates and TCP-validates candidate proxies before writing `socks5_proxies.txt`.
 - Appends the top 20 SOCKS5 proxies to `proxychains4.conf`.
 - Displays the last 30 lines of `proxychains4.conf` for verification.
