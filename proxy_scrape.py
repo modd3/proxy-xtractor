@@ -2,14 +2,16 @@ from bs4 import BeautifulSoup
 import requests
 
 def main():
-    base_url = "https://www.freeproxy.world/?type=socks5&anonymity=4&country=&speed=&port=&page={}"
+    base_url = "https://www.freeproxy.world/socks5/?page={}"
 
     # Iterate over 5 pages
     for page_num in range(1, 6):
         url = base_url.format(page_num)
 
         try:
-            response = requests.get(url)
+            # Add a User-Agent header to avoid blocking
+            headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
+            response = requests.get(url, headers=headers)
             response.raise_for_status()
         except requests.exceptions.RequestException as e:
             print(f"[!] Failed to fetch page {page_num}: {e}")
@@ -18,16 +20,16 @@ def main():
         try:
             soup = BeautifulSoup(response.text, 'html.parser')
 
-            # Find all <td> elements with class 'show-ip-div'
+            # Find all <td> elements with class 'show-ip-div' (IP addresses)
             ip_elements = soup.find_all('td', class_='show-ip-div')
 
-            # Find all <td> elements
+            # Find all <td> elements to extract ports and types
             port_td_elements = soup.find_all('td')
 
-            # Extracting text from each element and adding to list
+            # Extract IPs
             ip_list = [ip.get_text(strip=True) for ip in ip_elements]
 
-            # Check if they contain a child <a> element with 'href' containing the string 'port' or 'type'
+            # Extract ports and types from <a> elements containing 'port' or 'type' in href
             port_list = []
             type_list = []
             for td in port_td_elements:
@@ -42,7 +44,7 @@ def main():
                 print(f"[!] No proxies found on page {page_num}")
                 continue
 
-            # Write to a text file in the format type ip port in every line
+            # Write to a text file in the format "type ip port"
             with open('socks5_proxies.txt', 'a') as txt_file:
                 for ip, port, typ in zip(ip_list, port_list, type_list):
                     txt_file.write(f"{typ} {ip} {port}\n")
