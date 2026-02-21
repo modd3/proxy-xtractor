@@ -2,10 +2,10 @@ from bs4 import BeautifulSoup
 import requests
 
 def main():
-    base_url = "https://www.freeproxy.world/socks5/?page={}"
+    base_url = "https://www.freeproxy.world/?type=socks5&anonymity=&country=&speed=2000&port=&page={}"
 
     # Iterate over 5 pages
-    for page_num in range(1, 6):
+    for page_num in range(1, 10):
         url = base_url.format(page_num)
 
         try:
