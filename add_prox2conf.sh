@@ -1,4 +1,9 @@
 #!/bin/bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR"
+
 
 display_banner() {
 	cat << "EOF"
@@ -59,7 +64,12 @@ else
 fi
 
 echo '[*] Getting fresh socks5 proxies...'
-if ! python proxy_scrape.py; then
+if ! python3 -m py_compile proxy_scrape.py; then
+    echo "[!] proxy_scrape.py has a syntax error."
+    exit 1
+fi
+
+if ! python3 proxy_scrape.py; then
     echo "[!] Failed to run proxy_scrape.py."
     exit 1
 fi
